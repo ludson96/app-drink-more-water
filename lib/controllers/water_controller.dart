@@ -1,40 +1,73 @@
-import 'package:flutter/foundation.dart';
+import 'package:mobx/mobx.dart';
+import 'package:hive_ce/hive.dart';
+import '../models/daily_goal_model.dart';
 import '../models/water_intake_model.dart';
 
-class WaterController with ChangeNotifier {
-  final List<WaterIntake> _intakes = [];
-  DailyGoal _goal = DailyGoal(targetInMl: 2000);
+part 'water_controller.g.dart';
 
-  List<WaterIntake> get intakes => List.unmodifiable(_intakes);
-  DailyGoal get goal => _goal;
+class WaterController = _WaterController with _$WaterController;
 
+abstract class _WaterController with Store {
+  late final Box<WaterIntake> _intakeBox;
+  late final Box<DailyGoal> _goalBox;
+
+  _WaterController() {
+    _intakeBox = Hive.box<WaterIntake>('intakes');
+    _goalBox = Hive.box<DailyGoal>('goal');
+    _loadData();
+  }
+
+  @observable
+  ObservableList<WaterIntake> intakes = ObservableList<WaterIntake>();
+
+  @observable
+  DailyGoal goal = DailyGoal(targetInMl: 2000);
+
+  @computed
   int get totalConsumed {
-    return _intakes.fold(0, (sum, item) => sum + item.amountInMl);
+    return intakes.fold(0, (sum, item) => sum + item.amountInMl);
   }
 
+  @computed
   double get progress {
-    if (_goal.targetInMl == 0) return 0;
-    return totalConsumed / _goal.targetInMl;
+    if (goal.targetInMl == 0) return 0;
+    return totalConsumed / goal.targetInMl;
   }
 
+  @action
+  void _loadData() {
+    intakes.addAll(_intakeBox.values);
+    if (_goalBox.isNotEmpty) {
+      goal = _goalBox.values.first;
+    } else {
+      _goalBox.add(goal);
+    }
+  }
+
+  @action
   void addWater(int amountInMl) {
-    _intakes.add(
-      WaterIntake(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        amountInMl: amountInMl,
-        time: DateTime.now(),
-      ),
+    final intake = WaterIntake(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      amountInMl: amountInMl,
+      time: DateTime.now(),
     );
-    notifyListeners();
+    _intakeBox.put(intake.id, intake);
+    intakes.add(intake);
   }
 
+  @action
   void removeWater(String id) {
-    _intakes.removeWhere((item) => item.id == id);
-    notifyListeners();
+    _intakeBox.delete(id);
+    intakes.removeWhere((item) => item.id == id);
   }
 
+  @action
   void updateGoal(int newGoal) {
-    _goal = DailyGoal(targetInMl: newGoal);
-    notifyListeners();
+    goal = DailyGoal(targetInMl: newGoal);
+    if (_goalBox.isNotEmpty) {
+      _goalBox.putAt(0, goal);
+    } else {
+      _goalBox.add(goal);
+    }
   }
 }

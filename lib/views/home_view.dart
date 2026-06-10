@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../controllers/water_controller.dart';
 import '../models/water_intake_model.dart';
 
@@ -14,9 +15,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: widget.controller,
-      builder: (context, _) {
+    return Observer(
+      builder: (_) {
         final totalConsumed = widget.controller.totalConsumed;
         final target = widget.controller.goal.targetInMl;
         final progress = widget.controller.progress;
@@ -49,7 +49,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: _buildHistoryList(intakes),
+                  child: _buildHistoryList(intakes.toList()),
                 ),
               ],
             ),
