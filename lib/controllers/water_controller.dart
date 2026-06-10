@@ -5,6 +5,7 @@ import '../models/water_intake_model.dart';
 
 part 'water_controller.g.dart';
 
+// ignore: library_private_types_in_public_api
 class WaterController = _WaterController with _$WaterController;
 
 abstract class _WaterController with Store {

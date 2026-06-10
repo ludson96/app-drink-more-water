@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'controllers/water_controller.dart';
-import 'models/daily_goal_model.dart';
-import 'models/water_intake_model.dart';
 import 'views/home_view.dart';
+import 'injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Hive.initFlutter();
-  Hive.registerAdapter(WaterIntakeAdapter());
-  Hive.registerAdapter(DailyGoalAdapter());
-  
-  await Hive.openBox<WaterIntake>('intakes');
-  await Hive.openBox<DailyGoal>('goal');
 
-  final waterController = WaterController();
+  // Inicializa todas as dependências (Hive, GetIt, etc)
+  await initDependencies();
+
+  // Recupera o controller instanciado pelo GetIt
+  final waterController = getIt<WaterController>();
+
   runApp(DrinkMoreWaterApp(controller: waterController));
 }
 

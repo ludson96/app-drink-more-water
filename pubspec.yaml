@@ -41,6 +41,7 @@ dependencies:
 
   # Bancos de dados
   hive_ce: ">=2.19.0 <2.20.0"
+  hive_ce_flutter: ^2.3.4
 
 dev_dependencies:
   flutter_test:
