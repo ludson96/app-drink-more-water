@@ -71,4 +71,27 @@ abstract class _WaterController with Store {
       _goalBox.add(goal);
     }
   }
+
+  void checkDailyReset() {
+    final box = Hive.box<WaterIntake>('intakes');
+    final now = DateTime.now();
+
+    final keysToDelete = [];
+    for (var key in box.keys) {
+      final intake = box.get(key);
+      if (intake != null) {
+        // Verifica se o registro é de um dia diferente de hoje
+        if (intake.time.year != now.year ||
+            intake.time.month != now.month ||
+            intake.time.day != now.day) {
+          keysToDelete.add(key);
+        }
+      }
+    }
+
+    // Se houver registros antigos, limpa a base e atualiza a interface
+    if (keysToDelete.isNotEmpty) {
+      box.deleteAll(keysToDelete);
+    }
+  }
 }

@@ -12,6 +12,9 @@ void main() async {
   // Recupera o controller instanciado pelo GetIt
   final waterController = getIt<WaterController>();
 
+  // Verifica se houve virada de dia para zerar o progresso
+  waterController.checkDailyReset();
+
   runApp(DrinkMoreWaterApp(controller: waterController));
 }
 
